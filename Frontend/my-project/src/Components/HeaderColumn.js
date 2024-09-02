@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-const HeaderColumn = () => {
+const HeaderColumn = ( { dateFrom, dateTo, setFilteredCount } ) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [orders, setOrders] = useState([]);
-  const [dataCount, setDataCount] = useState(0);
+  const [filteredData, setFilteredData] = useState([]);
 
   const toggleExpand = (id) => {
     setExpandedRows((prevState) => ({
@@ -13,20 +13,43 @@ const HeaderColumn = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+  
 
   const fetchOrders = async () => {
     try {
       const response = await fetch('http://localhost:3003/order');
-      const data = await response.json();
-      setOrders(data);
-
+      const result = await response.json();
+      setOrders(result);
+      setFilteredData(result);
+      setFilteredCount(result.length);
     }
     catch (error) {
       console.error('Error fetching data:', error);
     }
   };
+  fetchOrders();
+  }, [setFilteredCount]);
+
+  useEffect(() => {
+    if (dateFrom && dateTo) {
+    // Filter data based on date range
+    const filtered = orders.filter((order) => {
+      const orderDate = new Date(order.dateTime);
+      const fromDate = new Date(dateFrom);
+      const toDate = new Date(dateTo);
+
+      return orderDate >= fromDate && orderDate <= toDate;
+    });
+
+    // Update filtered data and count
+    setFilteredData(filtered);
+    setFilteredCount(filtered.length); // Send count back to parent component
+  } else {
+    // If no date range is selected, show all data
+    setFilteredData(orders);
+    setFilteredCount(orders.length);
+  }
+}, [orders, dateFrom, dateTo, setFilteredCount]);
 
 
   return (
@@ -44,11 +67,11 @@ const HeaderColumn = () => {
         <div className="col-span-1">No. Ref.</div>
         <div className="col-span-1">Ext. Ref.</div>
       </div>
-      {orders.map((order) => (
+      {filteredData.map((order) => (
         <div key={order.id} className="border-b border-gray-200">
-          <div className="grid grid-cols-12 gap-4 items-center py-2 cursor-pointer hover:bg-gray-100" onClick={() => toggleExpand(order.id)}>
+          <div className="grid grid-cols-12 gap-4 items-center py-2 cursor-pointer hover:bg-gray-100 text-sm" onClick={() => toggleExpand(order.id)}>
             <div className="col-span-1 flex items-center">
-              <span className="mr-2 ">▼</span>
+              <span className="mr-2 ">{expandedRows[order.id] ? "▼" : "▶"}</span>
               <p className='text-blue-700'>{order.account}</p>
             </div>
 
@@ -56,7 +79,7 @@ const HeaderColumn = () => {
             <div className="col-span-1">{order.symbol}</div>
             <div className="col-span-2">{order.description}</div>
             <div className="col-span-1">{order.qty}</div>
-            <div className="col-span-1">{order.filledQty}</div>
+            <div className="col-span-1">{order.filedQty}</div>
             <div className="col-span-1">{order.price}</div>
             <div className="col-span-1">{order.status}</div>
             <div className="col-span-1">{order.dateTime}</div>
