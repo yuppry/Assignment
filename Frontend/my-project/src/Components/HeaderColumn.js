@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
-const HeaderColumn = ( { dateFrom, dateTo, setFilteredCount } ) => {
+const HeaderColumn = ({ dateFrom, dateTo, setFilteredCount }) => {
   const [expandedRows, setExpandedRows] = useState({});
   const [orders, setOrders] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const toggleExpand = (id) => {
     setExpandedRows((prevState) => ({
@@ -13,78 +14,93 @@ const HeaderColumn = ( { dateFrom, dateTo, setFilteredCount } ) => {
   };
 
   useEffect(() => {
-  
 
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch('http://localhost:3003/order');
-      const result = await response.json();
-      setOrders(result);
-      setFilteredData(result);
-      setFilteredCount(result.length);
-    }
-    catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-  fetchOrders();
+
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch('http://localhost:3003/order');
+        const result = await response.json();
+        setOrders(result);
+        setFilteredData(result);
+        setFilteredCount(result.length);
+      }
+      catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchOrders();
   }, [setFilteredCount]);
 
   useEffect(() => {
     if (dateFrom && dateTo) {
-    // Filter data based on date range
-    const filtered = orders.filter((order) => {
-      const orderDate = new Date(order.dateTime);
-      const fromDate = new Date(dateFrom);
-      const toDate = new Date(dateTo);
+      // Filter data based on date range
+      const filtered = orders.filter((order) => {
+        const orderDate = new Date(order.dateTime);
+        const fromDate = new Date(dateFrom);
+        const toDate = new Date(dateTo);
 
-      return orderDate >= fromDate && orderDate <= toDate;
+        return orderDate >= fromDate && orderDate <= toDate;
+      });
+
+      // Update filtered data and count
+      setFilteredData(filtered);
+      setFilteredCount(filtered.length); // Send count back to parent component
+    } else {
+      // If no date range is selected, show all data
+      setFilteredData(orders);
+      setFilteredCount(orders.length);
+    }
+  }, [orders, dateFrom, dateTo, setFilteredCount]);
+
+  const handleSortByDate = () => {
+    const sortedData = [...filteredData].sort((a, b) => {
+      const dateA = new Date(a.dateTime);
+      const dateB = new Date(b.dateTime);
+
+      if (sortOrder === 'asc') {
+        return dateA - dateB;
+      } else {
+        return dateB - dateA;
+      }
     });
 
-    // Update filtered data and count
-    setFilteredData(filtered);
-    setFilteredCount(filtered.length); // Send count back to parent component
-  } else {
-    // If no date range is selected, show all data
-    setFilteredData(orders);
-    setFilteredCount(orders.length);
-  }
-}, [orders, dateFrom, dateTo, setFilteredCount]);
+    setFilteredData(sortedData);
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
 
 
   return (
-    <div className="p-4 bg-white shadow rounded-lg">
-      <div className="grid grid-cols-12 gap-4 py-2 text-sm font-semibold border-b">
-        <div className="col-span-1">Account</div>
-        <div className="col-span-1">Operation</div>
-        <div className="col-span-1">Symbol</div>
-        <div className="col-span-2">Description</div>
-        <div className="col-span-1">Qty.</div>
-        <div className="col-span-1">Filled Qty</div>
-        <div className="col-span-1">Price</div>
-        <div className="col-span-1">Status</div>
-        <div className="col-span-1">Date</div>
-        <div className="col-span-1">No. Ref.</div>
-        <div className="col-span-1">Ext. Ref.</div>
-      </div>
+    <div className="overflow-x-auto">
+    <div className="grid grid-cols-12 gap-2 p-2 font-bold border-b">
+      <div className="col-span-3 md:col-span-1">Account</div>
+      <div className="col-span-3 md:col-span-1">Operation</div>
+      <div className="col-span-3 md:col-span-1">Symbol</div>
+      <div className="hidden md:block md:col-span-2">Description</div>
+      <div className="hidden md:block md:col-span-1">Qty.</div>
+      <div className="hidden md:block md:col-span-1">Filled Qty</div>
+      <div className="hidden md:block md:col-span-1">Price</div>
+      <div className="md:block md:col-span-1">Status</div>
+      <div className="hidden md:block md:col-span-1"><button onClick={handleSortByDate}>Date {sortOrder === 'asc' ? '↑' : '↓'}</button></div>
+      <div className="hidden md:block md:col-span-1">No. Ref.</div>
+      <div className="hidden md:block md:col-span-1">Ext. Ref.</div>
+      
+    </div>
       {filteredData.map((order) => (
         <div key={order.id} className="border-b border-gray-200">
           <div className="grid grid-cols-12 gap-4 items-center py-2 cursor-pointer hover:bg-gray-100 text-sm" onClick={() => toggleExpand(order.id)}>
-            <div className="col-span-1 flex items-center">
-              <span className="mr-2 ">{expandedRows[order.id] ? "▼" : "▶"}</span>
-              <p className='text-blue-700'>{order.account}</p>
+            <div className="col-span-3 md:col-span-1">
+              <p className='text-blue-700'>{expandedRows[order.id] ? "▼" : "▶"}{order.account}</p>
             </div>
-
-            <div className="col-span-1">{order.operation}</div>
-            <div className="col-span-1">{order.symbol}</div>
-            <div className="col-span-2">{order.description}</div>
-            <div className="col-span-1">{order.qty}</div>
-            <div className="col-span-1">{order.filedQty}</div>
-            <div className="col-span-1">{order.price}</div>
-            <div className="col-span-1">{order.status}</div>
-            <div className="col-span-1">{order.dateTime}</div>
-            <div className="col-span-1">{order.referenceNo}</div>
-            <div className="col-span-1">{order.externalReferenceNo}</div>
+            <div className="col-span-3 md:col-span-1">{order.operation}</div>
+            <div className="col-span-3 md:col-span-1">{order.symbol}</div>
+            <div className="hidden md:block md:col-span-2">{order.description}</div>
+            <div className="hidden md:block md:col-span-1">{order.qty}</div>
+            <div className="hidden md:block md:col-span-1">{order.filedQty}</div>
+            <div className="hidden md:block md:col-span-1">{order.price}</div>
+            <div className="md:block md:col-span-1">{order.status}</div>
+            <div className="hidden md:block md:col-span-1">{order.dateTime}</div>
+            <div className="hidden md:block md:col-span-1">{order.referenceNo}</div>
+            <div className="hidden md:block md:col-span-1">{order.externalReferenceNo}</div>
           </div>
 
           {expandedRows[order.id] && (

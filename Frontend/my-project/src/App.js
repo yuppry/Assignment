@@ -9,18 +9,18 @@ export default function App() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [filteredCount, setFilteredCount] = useState(0);
-  return(
+  return (
     <div className="App">
-      <SearchHeader dateFrom={dateFrom} 
-        dateTo={dateTo} 
-        setDateFrom={setDateFrom} 
-        setDateTo={setDateTo} 
-        filteredCount={filteredCount}/>
+      <SearchHeader dateFrom={dateFrom}
+        dateTo={dateTo}
+        setDateFrom={setDateFrom}
+        setDateTo={setDateTo}
+        filteredCount={filteredCount} />
 
-      <HeaderColumn dateFrom={dateFrom} 
-        dateTo={dateTo} 
-        setFilteredCount={setFilteredCount}/>
-      
+      <HeaderColumn dateFrom={dateFrom}
+        dateTo={dateTo}
+        setFilteredCount={setFilteredCount} />
+
     </div>
   )
 }
