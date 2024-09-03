@@ -1,6 +1,9 @@
 package com.assignment.salary.service.impl;
 
+import com.assignment.salary.mapper.DataMapper;
 import com.assignment.salary.model.SalarySurvey;
+import com.assignment.salary.model.SalarySurveyDataLoad;
+import com.assignment.salary.model.SalarySurveyResponse;
 import com.assignment.salary.repository.SalaryRepository;
 import com.assignment.salary.service.SalaryService;
 import jakarta.persistence.Column;
@@ -9,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,23 +22,40 @@ public class SalaryServiceImpl implements SalaryService {
     @Autowired
     private SalaryRepository salaryRepository;
 
+    @Autowired
+    private DataMapper mapper;
+
 
     @Override
-    public List<SalarySurvey> getAllSurveys() {
-        return salaryRepository.findAll();
+    public List<SalarySurveyResponse> getAllSurveys() {
+        List<SalarySurvey> surveys = salaryRepository.findAll();
+
+        return new java.util.ArrayList<>(surveys
+                .stream()
+                .map(mapper::toSalarySurveyResponse)
+                .toList());
     }
 
     @Override
-    public List<SalarySurvey> findSalarySurveyByGenderAndJobTitle(String gender, String jobTitle,Long salaryGte, Long salaryLte,
-                                                                  Long salaryGt, Long salaryLt, Long salaryEq) {
-        return salaryRepository.findSalarySurveyByGenderAndJobTitleAndSalary(gender,jobTitle,salaryGte,salaryLte,salaryGt,salaryLt,salaryEq);
+    public List<SalarySurveyResponse> findSalarySurveyByGenderAndJobTitle(String gender, String jobTitle, Long salaryGte, Long salaryLte,
+                                                                          Long salaryGt, Long salaryLt, Long salaryEq) {
+        List<SalarySurvey> surveys = salaryRepository.findSalarySurveyByGenderAndJobTitleAndSalary(gender,jobTitle,salaryGte,salaryLte,salaryGt,salaryLt,salaryEq);
+        return new java.util.ArrayList<>(surveys
+                .stream()
+                .map(mapper::toSalarySurveyResponse)
+                .toList());
     }
 
     @Override
-    public List<SalarySurvey> findSalarySurveySortedByField(String[] sortBy, String sortType) {
+    public List<SalarySurveyResponse> findSalarySurveySortedByField(String[] sortBy, String sortType) {
         Sort.Direction direction = sortType.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction,sortBy);
-        return salaryRepository.findAll(sort);
+        List<SalarySurvey> surveys = salaryRepository.findAll(sort);
+
+        return  new java.util.ArrayList<>(surveys
+                .stream()
+                .map(mapper::toSalarySurveyResponse)
+                .toList());
     }
 
     @Override

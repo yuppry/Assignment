@@ -2,6 +2,7 @@ package com.assignment.salary.controller;
 
 import com.assignment.salary.exception.ErrorResponse;
 import com.assignment.salary.model.SalarySurvey;
+import com.assignment.salary.model.SalarySurveyResponse;
 import com.assignment.salary.service.SalaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,9 @@ public class SalaryController {
     SalaryService salaryService;
 
     @GetMapping("/all")
-    public List<SalarySurvey> getAllSurveys() {
-        return salaryService.getAllSurveys();
+    public ResponseEntity<?> getAllSurveys() {
+        List<SalarySurveyResponse> data =salaryService.getAllSurveys();
+        return buildResponse(data);
     }
 
     @GetMapping
@@ -35,7 +37,7 @@ public class SalaryController {
             @RequestParam(value = "salary_gt",required = false) Long salaryGt,
             @RequestParam(value = "salary_lt",required = false) Long salaryLt,
             @RequestParam(value = "salary_eq",required = false) Long salaryEq){
-        List<SalarySurvey> data = salaryService.findSalarySurveyByGenderAndJobTitle(gender,jobTitle,salaryGte,salaryLte,salaryGt,salaryLt,salaryEq);
+        List<SalarySurveyResponse> data = salaryService.findSalarySurveyByGenderAndJobTitle(gender,jobTitle,salaryGte,salaryLte,salaryGt,salaryLt,salaryEq);
 
         return buildResponse(data);
     }
@@ -51,7 +53,7 @@ public class SalaryController {
     public ResponseEntity<?> getSurveySortedByField(
             @RequestParam(required = false) String[] sortBy,
             @RequestParam(value = "sort_type",required = false) String sortType) {
-        List<SalarySurvey> data = salaryService.findSalarySurveySortedByField(sortBy,sortType);
+        List<SalarySurveyResponse> data = salaryService.findSalarySurveySortedByField(sortBy,sortType);
 
         return buildResponse(data);
     }
