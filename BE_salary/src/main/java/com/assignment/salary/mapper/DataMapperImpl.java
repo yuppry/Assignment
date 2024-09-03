@@ -2,8 +2,11 @@ package com.assignment.salary.mapper;
 
 import com.assignment.salary.model.SalarySurvey;
 import com.assignment.salary.model.SalarySurveyDataLoad;
+import com.assignment.salary.model.SalarySurveyResponse;
 import com.assignment.salary.util.NumberUtils;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
 
 @Service
 public class DataMapperImpl implements DataMapper {
@@ -29,6 +32,18 @@ public class DataMapperImpl implements DataMapper {
         salarySurvey.setAdditionalComments(salarySurveyDataLoad.getAdditionalComments());
 
         return salarySurvey;
+    }
+
+    @Override
+    public SalarySurveyResponse toSalarySurveyResponse(SalarySurvey salarySurvey) {
+        if (salarySurvey == null) {
+            return null;
+        }
+        BigDecimal salaryAsBigDecimal = salarySurvey.getSalaryAsBigDecimal();
+
+        return new SalarySurveyResponse(salarySurvey.getId(), salarySurvey.getTimestamp(), salarySurvey.getEmployer(), salarySurvey.getLocation(),
+                salarySurvey.getJobTitle(), salarySurvey.getYearsAtEmployer(), salarySurvey.getYearsOfExperience(), salaryAsBigDecimal,
+                salarySurvey.getSigningBonus(), salarySurvey.getAnnualBonus(), salarySurvey.getAnnualStockValue(), salarySurvey.getGender(), salarySurvey.getAdditionalComments());
     }
 
     private Long validatedNumber(String input){
